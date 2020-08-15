@@ -1,0 +1,13 @@
+name: CTDestinations
+version: ${project.version}
+build: ${project.cibuild}
+main: de.crafttogether.CTDestinations
+api-version: 1.13
+softdepend: [Train_Carts]
+author: J0schlZ
+website: ${project.url}
+description: Provides a list of destinations for TrainCarts
+commands:
+  fahrziel:
+    description: Provides a list of destinations for TrainCarts
+    usage: /fahrziel
