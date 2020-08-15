@@ -10,6 +10,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -34,7 +35,47 @@ public class Commands implements TabExecutor {
 		if (p == null)
 			return false;
 
-		if (args.length == 0 || args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("liste")) {
+		if (args.length == 0) {
+			TextComponent newLine = new TextComponent(ComponentSerializer.parse("{text: \"\n\"}"));
+
+			sendMessage(p, "&e-------------- &c&lCraftBahn &e--------------");
+
+			TextComponent message = new TextComponent();
+			message.addExtra((BaseComponent) newLine);
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6Willkommen bei der CraftBahn!")));
+			message.addExtra((BaseComponent) newLine);
+
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&eUnser Schienennetz erstreckt sich in alle Himmelsrichtungen.")));
+			message.addExtra((BaseComponent) newLine);
+
+			message.addExtra((BaseComponent) newLine);
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6&lAnleitung: ")));
+			p.spigot().sendMessage((BaseComponent)message);
+
+			message = new TextComponent();
+			message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c/bahnhof")));
+			message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bahnhof"));
+			message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&eHowTo: &6Bahnhof"))).create()));
+			p.spigot().sendMessage((BaseComponent)message);
+
+			message = new TextComponent();
+			message.addExtra((BaseComponent) newLine);
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6&lFahrziele: ")));
+			p.spigot().sendMessage((BaseComponent)message);
+
+			message = new TextComponent();
+			message.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c/fahrziel list")));
+			message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel list"));
+			message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&eAlle Fahrziele auflisten"))).create()));
+			p.spigot().sendMessage((BaseComponent)message);
+
+			message = new TextComponent();
+			message.addExtra((BaseComponent) newLine);
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&eGute Fahrt!")));
+			p.spigot().sendMessage((BaseComponent)message);
+		}
+
+		else if (args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("liste")) {
 			TreeMap<String, Destination> destinations = this.plugin.getDestinations();
 			if (destinations.size() < 1) {
 				sendMessage(p, "&cEs ist noch kein Ziel in der Liste. Tippe &e/destination add <name> &czum hinzufügen.");
@@ -159,7 +200,7 @@ public class Commands implements TabExecutor {
 			return true;
 		}
 
-		if (args[0].equalsIgnoreCase("add")) {
+		else if (args[0].equalsIgnoreCase("add")) {
 
 			if (!p.hasPermission("ctdestination.add")) {
 				sendMessage(p, "&cDazu hast du keine Berechtigung.");
