@@ -42,45 +42,59 @@ public class Commands implements TabExecutor {
 
 			TextComponent message = new TextComponent();
 			message.addExtra((BaseComponent) newLine);
-			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6Willkommen bei der CraftBahn!")));
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &6Willkommen bei der CraftBahn!")));
 			message.addExtra((BaseComponent) newLine);
 
-			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&eUnser Schienennetz erstreckt sich in alle Himmelsrichtungen.")));
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &eUnser Schienennetz erstreckt sich")));
+			message.addExtra((BaseComponent) newLine);
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &ein alle Himmelsrichtungen.")));
 			message.addExtra((BaseComponent) newLine);
 
+
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8»")));
 			message.addExtra((BaseComponent) newLine);
-			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6&lAnleitung: ")));
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &6&lAnleitung: ")));
 			p.spigot().sendMessage((BaseComponent) message);
 
 			message = new TextComponent();
-			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c/bahnhof")));
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &c/bahnhof")));
 			message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bahnhof"));
 			message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&eHowTo: &6Bahnhof"))).create()));
 			p.spigot().sendMessage((BaseComponent) message);
 
 			message = new TextComponent();
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8»")));
 			message.addExtra((BaseComponent) newLine);
-			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6&lFahrziele: ")));
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &6&lFahrziele: ")));
 			p.spigot().sendMessage((BaseComponent) message);
 
 			message = new TextComponent();
-			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c/fahrziel list")));
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &c/fahrziel list")));
 			message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel list"));
 			message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&eAlle Fahrziele auflisten"))).create()));
 			p.spigot().sendMessage((BaseComponent) message);
 
 			message = new TextComponent();
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8»")));
 			message.addExtra((BaseComponent) newLine);
-			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&eGute Fahrt!")));
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &eGute Fahrt!")));
+			p.spigot().sendMessage((BaseComponent) message);
+
+			message = new TextComponent((BaseComponent) newLine);
+			message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&e----------------------------------------")));
+			message.addExtra((BaseComponent) newLine);
 			p.spigot().sendMessage((BaseComponent) message);
 
 			return true;
 		} else if (args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("liste")) {
 			TreeMap<String, Destination> destinations = this.plugin.getDestinations();
 			if (destinations.size() < 1) {
-				sendMessage(p, "&cEs ist noch kein Ziel in der Liste. Tippe &e/destination add <name> &czum hinzufügen.");
+				sendMessage(p, "&6CraftBahn &8» &cEs ist noch kein Ziel in der Liste. Tippe &e/destination add <name> &czum hinzufügen.");
 				return true;
 			}
+
+			sendMessage(p, "&e-------- &c&lCraftBahn &e| &6&lFahrziele &e--------");
+			sendMessage(p, "");
 
 			if (args.length < 2) {
 				sendDestinationList(p, Destination.DestinationType.MAIN_STATION);
@@ -92,6 +106,9 @@ public class Commands implements TabExecutor {
 			} else {
 				if (args[1].equalsIgnoreCase("privat") || args[1].equalsIgnoreCase("private")) {
 					sendDestinationList(p, null, true);
+
+					sendMessage(p, "");
+					sendMessage(p, "&e---------------------------------------");
 					return true;
 				}
 
@@ -106,10 +123,14 @@ public class Commands implements TabExecutor {
 				}
 
 				if (type == null)
-					sendMessage(p, "&cDie Kategorie '" + _type + "' existiert nicht.");
+					sendMessage(p, "&6CraftBahn &8» &cDie Kategorie '" + _type + "' existiert nicht.");
 				else
 					sendDestinationList(p, type);
 			}
+
+			sendMessage(p, "");
+			sendMessage(p, "&e----------------------------------------");
+
 		} else if (args[0].equalsIgnoreCase("add")) {
 			if (!p.hasPermission("ctdestinations.add")) {
 				sendMessage(p, "&cDazu hast du keine Berechtigung.");
@@ -117,16 +138,16 @@ public class Commands implements TabExecutor {
 			}
 
 			if (args.length < 2 || args[1].equals("") || args[1].length() < 1) {
-				sendMessage(p, "&cBitte gebe den Namen des Ziel ein.");
+				sendMessage(p, "&6CraftBahn &8» &cBitte gebe den Namen des Ziel ein.");
 				return true;
 			}
 
 			if (this.plugin.getDestination(args[1]) != null) {
-				sendMessage(p, "&cEs existiert bereits ein Ziel mit diesem Namen in der Liste.");
+				sendMessage(p, "&6CraftBahn &8» &cEs existiert bereits ein Ziel mit diesem Namen in der Liste.");
 				return true;
 			}
 
-			sendMessage(p, "&aZiel gespeichert.");
+			sendMessage(p, "&6CraftBahn &8» &aZiel gespeichert.");
 			this.plugin.addDestination(args[1], p.getUniqueId(), Destination.DestinationType.STATION, p.getLocation(), Boolean.valueOf(true));
 		} else if (args[0].equalsIgnoreCase("remove")) {
 			if (!p.hasPermission("ctdestinations.remove")) {
@@ -135,16 +156,16 @@ public class Commands implements TabExecutor {
 			}
 
 			if (args.length < 2 || args[1].equals("") || args[1].length() < 1) {
-				sendMessage(p, "&cBitte gebe den Namen des Ziel ein.");
+				sendMessage(p, "&6CraftBahn &8» &cBitte gebe den Namen des Ziel ein.");
 				return true;
 			}
 
 			if (this.plugin.getDestination(args[1]) == null) {
-				sendMessage(p, "&cEs existiert kein Ziel mit diesem Namen.");
+				sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen.");
 				return true;
 			}
 
-			sendMessage(p, "&aZiel gelöscht.");
+			sendMessage(p, "&6CraftBahn &8» &aZiel gelöscht.");
 			this.plugin.removeDestination(args[1]);
 		} else if (args[0].equalsIgnoreCase("setowner")) {
 			if (!p.hasPermission("ctdestinations.setowner")) {
@@ -153,31 +174,29 @@ public class Commands implements TabExecutor {
 			}
 
 			if (args.length < 2) {
-				sendMessage(p, "&cEs wurde kein Ziel angegeben.");
-				sendMessage(p, "/destination setowner <destination> <player>");
+				sendMessage(p, "&6CraftBahn &8» &6CraftBahn &8» &cEs wurde kein Ziel angegeben.");
 				return true;
 			}
 
 			if (this.plugin.getDestination(args[1]) == null) {
-				sendMessage(p, "&cEs existiert kein Ziel mit diesem Namen");
+				sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 				return true;
 			}
 
 			if (args.length < 3) {
-				sendMessage(p, "&cEs wurde kein Spieler angegeben");
-				sendMessage(p, "/destination setowner <destination> <player>");
+				sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Spieler angegeben");
 				return true;
 			}
 
 			OfflinePlayer owner = Bukkit.getOfflinePlayer(args[2]);
 			if (owner == null || !owner.hasPlayedBefore()) {
-				sendMessage(p, "&cEs wurde kein Spieler mit dem Namen &e" + args[2] + " &cgefunden");
+				sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Spieler mit dem Namen &e" + args[2] + " &cgefunden");
 				return true;
 			}
 
 			Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
 			this.plugin.setOwner(dest.getName(), owner.getUniqueId());
-			sendMessage(p, "&e" + dest.getName() + " &6gehnun &e" + owner.getName());
+			sendMessage(p, "&6CraftBahn &8» &e" + dest.getName() + " &6gehört nun &e" + owner.getName());
 		} else if (args[0].equalsIgnoreCase("settype")) {
 			if (!p.hasPermission("ctdestinations.settype")) {
 				sendMessage(p, "&cDazu hast du keine Berechtigung.");
@@ -185,19 +204,17 @@ public class Commands implements TabExecutor {
 			}
 
 			if (args.length < 2) {
-				sendMessage(p, "&cEs wurde kein Ziel angegeben");
-				sendMessage(p, "/destination settype <destination> <STATION|MAIN_STATION|PLAYER_STATION>");
+				sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Ziel angegeben");
 				return true;
 			}
 
 			if (this.plugin.getDestination(args[1]) == null) {
-				sendMessage(p, "&cEs existiert kein Ziel mit diesem Namen");
+				sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 				return true;
 			}
 
 			if (args.length < 3) {
-				sendMessage(p, "&cEs wurde kein Stationstyp angegeben");
-				sendMessage(p, "/destination settype <destination> <STATION|MAIN_STATION|PLAYER_STATION>");
+				sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Stationstyp angegeben");
 				return true;
 			}
 
@@ -208,13 +225,13 @@ public class Commands implements TabExecutor {
 			}
 
 			if (type == null) {
-				sendMessage(p, "&cUngültiger Stationstyp.");
+				sendMessage(p, "&6CraftBahn &8» &cUngültiger Stationstyp.");
 				return true;
 			}
 
 			Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
 			this.plugin.setType(dest.getName(), type);
-			sendMessage(p, "&e" + dest.getName() + " &6ist nun eine &e" + type);
+			sendMessage(p, "&6CraftBahn &8» &e" + dest.getName() + " &6ist nun eine &e" + type);
 		} else if (args[0].equalsIgnoreCase("setlocation")) {
 			if (!p.hasPermission("ctdestinations.setlocation")) {
 				sendMessage(p, "&cDazu hast du keine Berechtigung.");
@@ -222,19 +239,18 @@ public class Commands implements TabExecutor {
 			}
 
 			if (args.length < 2) {
-				sendMessage(p, "&cEs wurde kein Ziel angegeben");
-				sendMessage(p, "/destination setlocation <destination>");
+				sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Ziel angegeben");
 				return true;
 			}
 
 			if (this.plugin.getDestination(args[1]) == null) {
-				sendMessage(p, "&cEs existiert kein Ziel mit diesem Namen");
+				sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 				return true;
 			}
 
 			Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
 			this.plugin.setLocation(dest.getName(), p.getLocation());
-			sendMessage(p, "&6Du hast die Position von &e" + dest.getName() + " &6aktualisiert.");
+			sendMessage(p, "&6CraftBahn &8» &6Du hast die Position von &e" + dest.getName() + " &6aktualisiert.");
 		} else if (args[0].equalsIgnoreCase("setprivate")) {
 			if (!p.hasPermission("ctdestinations.setprivate")) {
 				sendMessage(p, "&cDazu hast du keine Berechtigung.");
@@ -242,19 +258,18 @@ public class Commands implements TabExecutor {
 			}
 
 			if (args.length < 2) {
-				sendMessage(p, "&cEs wurde kein Ziel angegeben");
-				sendMessage(p, "/destination setprivate <destination>");
+				sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Ziel angegeben");
 				return true;
 			}
 
 			if (this.plugin.getDestination(args[1]) == null) {
-				sendMessage(p, "&cEs existiert kein Ziel mit diesem Namen");
+				sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 				return true;
 			}
 
 			Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
 			this.plugin.setPublic(dest.getName(), Boolean.valueOf(false));
-			sendMessage(p, "&6Das Ziel &e" + dest.getName() + " &6ist nun &cprivat");
+			sendMessage(p, "&6CraftBahn &8» &6Das Ziel &e" + dest.getName() + " &6ist nun &cprivat");
 		} else if (args[0].equalsIgnoreCase("setpublic")) {
 			if (!p.hasPermission("ctdestinations.setpublic")) {
 				sendMessage(p, "&cDazu hast du keine Berechtigung.");
@@ -262,29 +277,28 @@ public class Commands implements TabExecutor {
 			}
 
 			if (args.length < 2) {
-				sendMessage(p, "&cEs wurde kein Ziel angegeben");
-				sendMessage(p, "/destination setpublic <destination>");
+				sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Ziel angegeben");
 				return true;
 			}
 
 			if (this.plugin.getDestination(args[1]) == null) {
-				sendMessage(p, "&cEs existiert kein Ziel mit diesem Namen");
+				sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 				return true;
 			}
 
 			Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
 			this.plugin.setPublic(dest.getName(), Boolean.valueOf(true));
-			sendMessage(p, "&6Das Ziel &e" + dest.getName() + " &6ist nun &2öffentlich.");
+			sendMessage(p, "&6CraftBahn &8» &6Das Ziel &e" + dest.getName() + " &6ist nun &2öffentlich.");
 		} else {
 			Destination dest = this.plugin.getDestination(args[0]);
 
 			if (dest == null) {
-				sendMessage(p, "&cEs existiert kein Ziel mit diesem Namen.");
+				sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen.");
 				return true;
 			}
 
 			else if (!dest.isPublic() && !p.hasPermission("ctdestinations.see.private")) {
-				sendMessage(p, "&cAuf dieses Ziel hast du keinen Zugriff.");
+				sendMessage(p, "&6CraftBahn &8» &cAuf dieses Ziel hast du keinen Zugriff.");
 				return true;
 			}
 
