@@ -131,7 +131,7 @@ public class CTDestinations extends JavaPlugin {
             Destination dest = entry.getValue();
             Location loc = dest.getLocation();
             String location = loc.getWorld().getName() + "," + loc.getX() + "," + loc.getY() + "," + loc.getZ() + "," + loc.getPitch() + "," + loc.getYaw();
-            data = data + dest.getName() + ":" + dest.getOwner() + ":" + dest.getType() + ":" + location + ":" + dest.isPublic() + "\r\n";
+            data = data + dest.getName() + ":" + dest.getOwner() + ":" + dest.getType().name() + ":" + location + ":" + dest.isPublic() + "\r\n";
         }
 
         try {

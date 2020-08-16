@@ -15,7 +15,26 @@ public class Destination {
     private Boolean isPublic = null;
 
     public enum DestinationType {
-        PLAYER_STATION, MAIN_STATION, STATION;
+        STATION {
+            @Override
+            public String toString() {
+                return "Bahnhof";
+            }
+        },
+
+        MAIN_STATION {
+            @Override
+            public String toString() {
+                return "Hauptbahnhof";
+            }
+        },
+
+        PLAYER_STATION {
+            @Override
+            public String toString() {
+                return "Spielerbahnhof";
+            }
+        }
     }
 
     public Destination(String name, UUID owner, Enum<?> type, Location location, Boolean isPublic) {
@@ -72,5 +91,14 @@ public class Destination {
 
     public void setPublic(Boolean isPublic) {
         this.isPublic = isPublic;
+    }
+
+    public static DestinationType findType(String label) {
+        switch (label.toLowerCase()) {
+            case "bahnhof": return DestinationType.STATION;
+            case "hauptbahnhof": return DestinationType.MAIN_STATION;
+            case "spielerbahnhof": return DestinationType.PLAYER_STATION;
+        }
+        return null;
     }
 }
