@@ -3,7 +3,7 @@
 
     <groupId>de.crafttogether</groupId>
     <artifactId>CTDestinations</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.2.2</version>
     <packaging>jar</packaging>
 
     <name>CTDestinations</name>
