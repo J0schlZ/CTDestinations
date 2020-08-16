@@ -120,6 +120,11 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+
+        <repository>
+            <id>bergerkiller-repo</id>
+            <url>https://ci.mg-dev.eu/plugin/repository/everything</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -127,6 +132,18 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.16.1-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.bergerkiller.bukkit</groupId>
+            <artifactId>TrainCarts</artifactId>
+            <version>1.16.1-v2-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.bergerkiller.bukkit</groupId>
+            <artifactId>BKCommonLib</artifactId>
+            <version>1.16.1-v1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

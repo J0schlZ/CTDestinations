@@ -1,5 +1,8 @@
 package de.crafttogether;
 
+import com.bergerkiller.bukkit.tc.*;
+import com.bergerkiller.bukkit.tc.controller.MinecartMember;
+import com.bergerkiller.bukkit.tc.controller.MinecartMemberStore;
 import de.crafttogether.ctdestinations.Commands;
 import de.crafttogether.ctdestinations.Destination;
 import java.io.BufferedReader;
@@ -20,17 +23,35 @@ import org.bukkit.World;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class CTDestinations extends JavaPlugin {
+public class CTDestinations extends JavaPlugin implements Listener {
     private static CTDestinations plugin;
 
     private TreeMap<String, Destination> destinations;
 
     public void onEnable() {
         plugin = this;
+
+        if (!getServer().getPluginManager().isPluginEnabled("Train_Carts")) {
+            plugin.getLogger().warning("Couln't find TrainCarts");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+
+        if (!getServer().getPluginManager().isPluginEnabled("BKCommonLib")) {
+            plugin.getLogger().warning("Couln't find BKCommonLib");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+
         readData();
+        getServer().getPluginManager().registerEvents(new TrainListener(), this);
         registerCommand("fahrziel", (TabExecutor)new Commands());
     }
 
