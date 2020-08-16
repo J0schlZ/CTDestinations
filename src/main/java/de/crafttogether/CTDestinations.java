@@ -52,7 +52,10 @@ public class CTDestinations extends JavaPlugin implements Listener {
 
         readData();
         getServer().getPluginManager().registerEvents(new TrainListener(), this);
-        registerCommand("fahrziel", (TabExecutor)new Commands());
+        TabExecutor cmdListener = new Commands();
+        registerCommand("fahrziel", cmdListener);
+        registerCommand("fahrziele", cmdListener);
+        registerCommand("fahrzieledit", cmdListener);
     }
 
     public void onDisable() {}

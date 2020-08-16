@@ -8,6 +8,12 @@ author: J0schlZ
 website: ${project.url}
 description: Provides a list of destinations for TrainCarts
 commands:
+  fahrziele:
+    description: Show destination list
+    usage: /fahrziele
   fahrziel:
-    description: Provides a list of destinations for TrainCarts
-    usage: /fahrziel
+    description: Set the current destination for a train
+    usage: /fahrziel <name>
+  fahrzieledit:
+    description: Manage destinations
+    usage: /fahrzieledit

@@ -45,7 +45,7 @@ public class TrainListener implements Listener {
                 message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &eVerstehst du nur ")));
                 message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&c/bahnhof")));
                 message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/bahnhof"));
-                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&eInformationen zum Schienennetz"))).create()));
+                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&6Informationen zum Schienennetz"))).create()));
                 message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&e?")));
                 p.spigot().sendMessage((BaseComponent) message);
 
@@ -56,8 +56,8 @@ public class TrainListener implements Listener {
                     message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &c&lHinweis:")));
                     message.addExtra((BaseComponent) newLine);
                     message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &cDieser Zug hat noch kein Fahrziel.")));
-                    message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel list"));
-                    message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&eVerfügbare Fahrziele anzeigen"))).create()));
+                    message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele"));
+                    message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&6Verfügbare Fahrziele anzeigen"))).create()));
                     p.spigot().sendMessage((BaseComponent) message);
                 }
                 else {
@@ -67,8 +67,8 @@ public class TrainListener implements Listener {
                     message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &eDieser Zug versucht, das Ziel:")));
                     message.addExtra((BaseComponent) newLine);
                     message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &f'&6&l" + cart.getProperties().getDestination() + "&f' &ezu erreichen.")));
-                    message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel list"));
-                    message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&eAnderes Fahrziel auswählen"))).create()));
+                    message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele"));
+                    message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&6Anderes Fahrziel auswählen"))).create()));
                     p.spigot().sendMessage((BaseComponent) message);
                 }
 
