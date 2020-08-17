@@ -94,7 +94,7 @@ public class Commands implements TabExecutor {
 				return true;
 			}
 			else {
-				Destination dest = this.plugin.getDestination(args[0]);
+				Destination dest = plugin.getDestination(args[0]);
 
 				if (dest == null) {
 					sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen.");
@@ -119,7 +119,7 @@ public class Commands implements TabExecutor {
 			if (p == null)
 				return false;
 
-			TreeMap<String, Destination> destinations = this.plugin.getDestinations();
+			TreeMap<String, Destination> destinations = plugin.getDestinations();
 			if (destinations.size() < 1) {
 				sendMessage(p, "&6CraftBahn &8» &cEs ist noch kein Ziel in der Liste. Tippe &e/destination add <name> &czum hinzufügen.");
 				return true;
@@ -178,16 +178,17 @@ public class Commands implements TabExecutor {
 				sendMessage(p,"&e/fahrzieledit remove &7<name> &f- &6Fahrziel entfernen");
 				sendMessage(p,"&e/fahrzieledit settype &7<name> <typ> &f- &6Kategorie aktualisieren");
 				sendMessage(p,"&e/fahrzieledit setowner &7<name> &f- &6Besitzer aktualisieren");
-				sendMessage(p,"&e/fahrzieledit setlocation &7<name> &f- &6Teleportpunkt aktualisieren");
+				sendMessage(p,"&e/fahrzieledit setlocation &7<name> &f- &6Position / Marker aktualisieren");
 				sendMessage(p,"&e/fahrzieledit setprivate &7<name> &f- &6Fahrziel verstecken");
 				sendMessage(p,"&e/fahrzieledit setpublic &7<name> &f- &6Fahrziel wieder anzeigen");
 				sendMessage(p,"&e/fahrzieledit tp &7<name> &f- &6Teleportiere zu Fahrziel");
+				sendMessage(p,"&e/fahrzieledit updatemarker &7<name> &f- &6Update alle Dynmap-Marker");
 			}
 
 			else if (args[0].equalsIgnoreCase("add")) {
 				boolean isPublic = true;
 
-				if (!p.hasPermission("ctdestinations.add")) {
+				if (!p.hasPermission("ctdestinations.edit.add")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
 					return true;
 				}
@@ -197,7 +198,7 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				if (this.plugin.getDestination(args[1]) != null) {
+				if (plugin.getDestination(args[1]) != null) {
 					sendMessage(p, "&6CraftBahn &8» &cEs existiert bereits ein Ziel mit diesem Namen in der Liste.");
 					return true;
 				}
@@ -223,9 +224,9 @@ public class Commands implements TabExecutor {
 				}
 
 				sendMessage(p, "&6CraftBahn &8» &aZiel gespeichert.");
-				this.plugin.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic));
+				plugin.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic));
 			} else if (args[0].equalsIgnoreCase("remove")) {
-				if (!p.hasPermission("ctdestinations.remove")) {
+				if (!p.hasPermission("ctdestinations.edit.remove")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
 					return true;
 				}
@@ -235,15 +236,17 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				if (this.plugin.getDestination(args[1]) == null) {
+				Destination dest = plugin.getDestination(args[1]);
+				if (dest == null) {
 					sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen.");
 					return true;
 				}
 
 				sendMessage(p, "&6CraftBahn &8» &aZiel gelöscht.");
-				this.plugin.removeDestination(args[1]);
+				plugin.deleteMarker(dest);
+				plugin.removeDestination(dest.getName());
 			} else if (args[0].equalsIgnoreCase("setowner")) {
-				if (!p.hasPermission("ctdestinations.setowner")) {
+				if (!p.hasPermission("ctdestinations.edit.setowner")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
 					return true;
 				}
@@ -253,7 +256,7 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				if (this.plugin.getDestination(args[1]) == null) {
+				if (plugin.getDestination(args[1]) == null) {
 					sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 					return true;
 				}
@@ -269,11 +272,11 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
-				this.plugin.setOwner(dest.getName(), owner.getUniqueId());
+				Destination dest = (Destination) plugin.getDestinations().get(args[1]);
+				plugin.setOwner(dest.getName(), owner.getUniqueId());
 				sendMessage(p, "&6CraftBahn &8» &f'&e" + dest.getName() + "&f' &6gehört nun &e" + owner.getName());
 			} else if (args[0].equalsIgnoreCase("settype")) {
-				if (!p.hasPermission("ctdestinations.settype")) {
+				if (!p.hasPermission("ctdestinations.edit.settype")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
 					return true;
 				}
@@ -283,7 +286,7 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				if (this.plugin.getDestination(args[1]) == null) {
+				if (plugin.getDestination(args[1]) == null) {
 					sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 					return true;
 				}
@@ -304,11 +307,11 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
-				this.plugin.setType(dest.getName(), type);
+				Destination dest = (Destination) plugin.getDestinations().get(args[1]);
+				plugin.setType(dest.getName(), type);
 				sendMessage(p, "&6CraftBahn &8» &e&f'" + dest.getName() + "&f' &6ist nun eine &e" + type);
 			} else if (args[0].equalsIgnoreCase("setlocation")) {
-				if (!p.hasPermission("ctdestinations.setlocation")) {
+				if (!p.hasPermission("ctdestinations.edit.setlocation")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
 					return true;
 				}
@@ -318,16 +321,17 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				if (this.plugin.getDestination(args[1]) == null) {
+				if (plugin.getDestination(args[1]) == null) {
 					sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 					return true;
 				}
 
-				Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
-				this.plugin.setLocation(dest.getName(), p.getLocation());
-				sendMessage(p, "&6CraftBahn &8» &6Du hast die Teleport-Position für das Ziel: &f'&e" + dest.getName() + "&f' &6aktualisiert.");
+				Destination dest = (Destination) plugin.getDestinations().get(args[1]);
+				plugin.setLocation(dest.getName(), p.getLocation());
+				plugin.setMarker(dest);
+				sendMessage(p, "&6CraftBahn &8» &6Du hast die Position für das Ziel: &f'&e" + dest.getName() + "&f' &6aktualisiert.");
 			} else if (args[0].equalsIgnoreCase("setprivate")) {
-				if (!p.hasPermission("ctdestinations.setprivate")) {
+				if (!p.hasPermission("ctdestinations.edit.setprivate")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
 					return true;
 				}
@@ -337,16 +341,16 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				if (this.plugin.getDestination(args[1]) == null) {
+				if (plugin.getDestination(args[1]) == null) {
 					sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 					return true;
 				}
 
-				Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
-				this.plugin.setPublic(dest.getName(), Boolean.valueOf(false));
+				Destination dest = (Destination) plugin.getDestinations().get(args[1]);
+				plugin.setPublic(dest.getName(), Boolean.valueOf(false));
 				sendMessage(p, "&6CraftBahn &8» &6Das Ziel: &f'&e" + dest.getName() + "'&f &6ist nun &cprivat");
 			} else if (args[0].equalsIgnoreCase("setpublic")) {
-				if (!p.hasPermission("ctdestinations.setpublic")) {
+				if (!p.hasPermission("ctdestinations.edit.setpublic")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
 					return true;
 				}
@@ -356,14 +360,27 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				if (this.plugin.getDestination(args[1]) == null) {
+				if (plugin.getDestination(args[1]) == null) {
 					sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 					return true;
 				}
 
-				Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
-				this.plugin.setPublic(dest.getName(), Boolean.valueOf(true));
+				Destination dest = (Destination) plugin.getDestinations().get(args[1]);
+				plugin.setPublic(dest.getName(), Boolean.valueOf(true));
 				sendMessage(p, "&6CraftBahn &8» &6Das Ziel: &f'&e" + dest.getName() + "&f' &6ist nun &2öffentlich.");
+			}  else if (args[0].equalsIgnoreCase("updatemarker")) {
+				if (!p.hasPermission("ctdestinations.edit.updatemarker")) {
+					sendMessage(p, "&cDazu hast du keine Berechtigung.");
+					return true;
+				}
+
+				plugin.createMarkerSets();
+				
+				TreeMap<String, Destination> destinations = plugin.getDestinations();
+				for (Destination dest : destinations.values())
+					plugin.setMarker(dest, true);
+
+				sendMessage(p, "&6CraftBahn &8» &6Es wurden &e" + destinations.values().size() + " &6Marker erneuert.");
 			}  else if (args[0].equalsIgnoreCase("tp")) {
 				if (!p.hasPermission("ctdestinations.teleport")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
@@ -375,12 +392,12 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
-				if (this.plugin.getDestination(args[1]) == null) {
+				if (plugin.getDestination(args[1]) == null) {
 					sendMessage(p, "&6CraftBahn &8» &cEs existiert kein Ziel mit diesem Namen");
 					return true;
 				}
 
-				Destination dest = (Destination) this.plugin.getDestinations().get(args[1]);
+				Destination dest = (Destination) plugin.getDestinations().get(args[1]);
 				p.teleport(dest.getLocation());
 				sendMessage(p, "&6CraftBahn &8» &6Du wurdest zum Ziel: &f'&e" + dest.getName() + "&f' &6teleportiert.");
 			}
@@ -394,7 +411,7 @@ public class Commands implements TabExecutor {
 	}
 
 	private void sendDestinationList(Player p, Destination.DestinationType type, boolean onlyPrivate) {
-		TreeMap<String, Destination> destinations = this.plugin.getDestinations();
+		TreeMap<String, Destination> destinations = plugin.getDestinations();
 		String listName = "";
 
 		sendMessage(p, "&6&l" + (onlyPrivate ? "Private Bahnhöfe" : (type.equals(Destination.DestinationType.MAIN_STATION) ? type.toString() : type.toString().replace("hof", "höfe"))) + "&f:");
@@ -454,7 +471,7 @@ public class Commands implements TabExecutor {
 		ArrayList<String> proposals = new ArrayList<>();
 
 		if (cmd.getName().equalsIgnoreCase("fahrziel")) {
-			TreeMap<String, Destination> destinations = this.plugin.getDestinations();
+			TreeMap<String, Destination> destinations = plugin.getDestinations();
 
 			for (Map.Entry<String, Destination> entry : destinations.entrySet()) {
 				if (!sender.hasPermission("ctdestinations.see.private") && !entry.getValue().isPublic()) continue;
@@ -488,7 +505,9 @@ public class Commands implements TabExecutor {
 					proposals.add("setpublic");
 				if (sender.hasPermission("ctdestinations.edit.setprivate"))
 					proposals.add("setprivate");
-				if (sender.hasPermission("ctdestinations.edit.teleport"))
+				if (sender.hasPermission("ctdestinations.edit.updatemarker"))
+					proposals.add("updatemarker");
+				if (sender.hasPermission("ctdestinations.teleport"))
 					proposals.add("tp");
 			}
 			else if (args.length == 2) {
@@ -497,7 +516,7 @@ public class Commands implements TabExecutor {
 						if (!sender.hasPermission("ctdestinations.edit." + args[0]))
 							return new ArrayList<String>();
 
-						TreeMap<String, Destination> destinations = this.plugin.getDestinations();
+						TreeMap<String, Destination> destinations = plugin.getDestinations();
 
 						for (Map.Entry<String, Destination> entry : destinations.entrySet()) {
 							if (args[0].equalsIgnoreCase("setprivate") && !entry.getValue().isPublic()) continue;
@@ -532,6 +551,10 @@ public class Commands implements TabExecutor {
 				proposals.add("STATION");
 				proposals.add("MAIN_STATION");
 				proposals.add("PLAYER_STATION");
+			}
+
+			else if (args.length == 4 && args[0].equalsIgnoreCase("add")) {
+				proposals.add("PRIVATE");
 			}
 		}
 

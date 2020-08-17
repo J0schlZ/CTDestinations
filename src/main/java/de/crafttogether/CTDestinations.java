@@ -12,10 +12,8 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.util.*;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -29,10 +27,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dynmap.DynmapAPI;
+import org.dynmap.DynmapCommonAPI;
+import org.dynmap.markers.Marker;
+import org.dynmap.markers.MarkerAPI;
+import org.dynmap.markers.MarkerIcon;
+import org.dynmap.markers.MarkerSet;
 
 public class CTDestinations extends JavaPlugin implements Listener {
     private static CTDestinations plugin;
 
+    private DynmapAPI dynmap = null;
     private TreeMap<String, Destination> destinations;
 
     public void onEnable() {
@@ -49,6 +54,14 @@ public class CTDestinations extends JavaPlugin implements Listener {
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
+
+        if (!getServer().getPluginManager().isPluginEnabled("Dynmap")) {
+            plugin.getLogger().warning("Couln't find Dynmap");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+
+        dynmap = (DynmapAPI) Bukkit.getServer().getPluginManager().getPlugin("Dynmap");
 
         readData();
         getServer().getPluginManager().registerEvents(new TrainListener(), this);
@@ -68,6 +81,101 @@ public class CTDestinations extends JavaPlugin implements Listener {
     public void broadcast(String message) {
         for (Player p : Bukkit.getServer().getOnlinePlayers())
             p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+    }
+
+    public void deleteMarker(Destination dest) {
+        MarkerSet set = dynmap.getMarkerAPI().getMarkerSet("CT_" + dest.getType().name());
+        if (set == null) return;
+
+        Marker marker = set.findMarker(dest.getName());
+        if (marker != null)
+            marker.deleteMarker();
+    }
+
+    public void createMarkerSets() {
+        if (dynmap == null)
+            return;
+
+        MarkerAPI markerApi = dynmap.getMarkerAPI();
+        MarkerIcon iconRail = markerApi.getMarkerIcon("ct-rail");
+        MarkerIcon iconMinecart = markerApi.getMarkerIcon("ct-minecart");
+
+        /* Create Icons if not existing */
+        if (iconRail == null) {
+            iconRail = dynmap.getMarkerAPI().createMarkerIcon("ct-rail", "ct-rail", getResource("rail.png"));
+            dynmap.getMarkerAPI().getMarkerIcons().add(iconRail);
+        }
+
+        if (iconMinecart == null) {
+            iconMinecart = dynmap.getMarkerAPI().createMarkerIcon("ct-minecart", "ct-minecart", getResource("minecart.png"));
+            dynmap.getMarkerAPI().getMarkerIcons().add(iconMinecart);
+        }
+
+        /* Create MarkerSets if not existing */
+        for (Destination.DestinationType type : Destination.DestinationType.values()) {
+            MarkerSet set = dynmap.getMarkerAPI().getMarkerSet("CT_" + type.name());
+
+            String label = "Bahnhof";
+            if (type.name().equals("MAIN_STATION"))
+                label = "Hauptbahnhof";
+            else if (type.name().equals("PLAYER_STATION"))
+                label = "Bahnhof (Spieler)";
+
+            if (set == null)
+                set = dynmap.getMarkerAPI().createMarkerSet("CT_" + type.name(), label, null, true);
+        }
+    }
+
+    public void setMarker(Destination dest) {
+        setMarker(dest, false);
+    }
+    public void setMarker(Destination dest, boolean updateOnly) {
+        if (dynmap == null)
+            return;
+
+        MarkerAPI markerApi = dynmap.getMarkerAPI();
+
+        if (!updateOnly)
+            createMarkerSets();
+
+        getLogger().info("Create Marker for '"+dest.getName()+"' updateOnly: " + updateOnly);
+
+        MarkerSet set = dynmap.getMarkerAPI().getMarkerSet("CT_" + dest.getType().name());
+        MarkerIcon icon = null;
+        String label = null;
+        String owner = Bukkit.getOfflinePlayer(dest.getOwner()).getName();
+        Boolean showOwner = true;
+
+        switch (dest.getType().name()) {
+            case "STATION":
+                icon = markerApi.getMarkerIcon("ct-rail");
+                label = "Bahnhof";
+                showOwner = false;
+                break;
+            case "MAIN_STATION":
+                icon = markerApi.getMarkerIcon("ct-rail");
+                label = "Hauptbahnhof";
+                showOwner = false;
+                break;
+            case "PLAYER_STATION":
+                icon = markerApi.getMarkerIcon("ct-minecart");
+                label = "Spielerbahnhof";
+                showOwner = true;
+                break;
+        }
+
+        if (owner == null)
+            showOwner = false;
+
+        label = "<div class=\"ctdestination\" id=\"" + dest.getName() + "\"><div style=\"padding:6px\"><h3 style=\"padding:0px;margin:0px;color:#ffaa00\">" + label + " <span style=\"color:#aaaaaa\">(" + dest.getName() + ")</span></h3>" + (showOwner ? "<span style=\"font-weight:bold;color:#aaaaaa;\">Besitzer:</span> " + owner + "<br>" : "") + "<span style=\"font-style:italic;font-weight:bold;color:#ff5555\">/fahrziel " + dest.getName() + "</span></div></div>";
+        //label += " ("+dest.getName()+")";
+
+        // Delete Marker if exists
+        deleteMarker(dest);
+
+        /* Create Marker */
+        Location loc = dest.getLocation();
+        set.createMarker(dest.getName(), label, true, loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), icon, false);
     }
 
     public void readData() {
@@ -189,7 +297,12 @@ public class CTDestinations extends JavaPlugin implements Listener {
         if (getDestination(name) != null)
             return;
 
-        this.destinations.put(name, new Destination(name, owner, (Enum)type, location, isPublic));
+        Destination dest = new Destination(name, owner, (Enum)type, location, isPublic);
+
+        // Create dynmap-marker
+        setMarker(dest);
+
+        this.destinations.put(name, dest);
         saveDestinations();
     }
 
