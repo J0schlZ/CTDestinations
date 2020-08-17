@@ -136,7 +136,7 @@ public class Commands implements TabExecutor {
 				if (p.hasPermission("ctdestinations.see.private"))
 					sendDestinationList(p, null, true);
 			} else {
-				if (args[1].equalsIgnoreCase("privat") || args[0].equalsIgnoreCase("private")) {
+				if (args[0].equalsIgnoreCase("privat") || args[0].equalsIgnoreCase("private")) {
 					sendDestinationList(p, null, true);
 
 					sendMessage(p, "");
@@ -185,13 +185,15 @@ public class Commands implements TabExecutor {
 			}
 
 			else if (args[0].equalsIgnoreCase("add")) {
+				boolean isPublic = true;
+
 				if (!p.hasPermission("ctdestinations.add")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
 					return true;
 				}
 
-				if (args.length < 2 || args[1].equals("") || args[1].length() < 1) {
-					sendMessage(p, "&6CraftBahn &8» &cBitte gebe den Namen des Ziel ein.");
+				if (args.length < 2) {
+					sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Ziel angegeben");
 					return true;
 				}
 
@@ -200,8 +202,28 @@ public class Commands implements TabExecutor {
 					return true;
 				}
 
+				if (args.length < 3) {
+					sendMessage(p, "&6CraftBahn &8» &cEs wurde kein Stationstyp angegeben");
+					return true;
+				}
+
+				if (args.length == 4 && (args[3].equalsIgnoreCase("private") || args[3].equalsIgnoreCase("hidden"))) {
+					isPublic = false;
+				}
+
+				Destination.DestinationType type = null;
+				try {
+					type = Destination.DestinationType.valueOf(args[2].toUpperCase());
+				} catch (Exception exception) {
+				}
+
+				if (type == null) {
+					sendMessage(p, "&6CraftBahn &8» &cUngültiger Stationstyp.");
+					return true;
+				}
+
 				sendMessage(p, "&6CraftBahn &8» &aZiel gespeichert.");
-				this.plugin.addDestination(args[1], p.getUniqueId(), Destination.DestinationType.STATION, p.getLocation(), Boolean.valueOf(true));
+				this.plugin.addDestination(args[1], p.getUniqueId(), type, p.getLocation(), Boolean.valueOf(isPublic));
 			} else if (args[0].equalsIgnoreCase("remove")) {
 				if (!p.hasPermission("ctdestinations.remove")) {
 					sendMessage(p, "&cDazu hast du keine Berechtigung.");
@@ -486,6 +508,11 @@ public class Commands implements TabExecutor {
 
 						break;
 
+					case "add":
+						if (!sender.hasPermission("ctdestinations.edit.add")) break;
+						proposals.add("<name>");
+						break;
+
 					case "settype":
 						if (!sender.hasPermission("ctdestinations.edit.settype")) break;
 						proposals.add("STATION");
@@ -499,6 +526,12 @@ public class Commands implements TabExecutor {
 							proposals.add(p.getName());
 						break;
 				}
+			}
+
+			else if (args.length == 3 && args[0].equalsIgnoreCase("add")) {
+				proposals.add("STATION");
+				proposals.add("MAIN_STATION");
+				proposals.add("PLAYER_STATION");
 			}
 		}
 
