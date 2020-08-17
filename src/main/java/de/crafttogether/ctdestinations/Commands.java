@@ -68,7 +68,7 @@ public class Commands implements TabExecutor {
 
 				message = new TextComponent();
 				message.addExtra((BaseComponent) new TextComponent(ChatColor.translateAlternateColorCodes('&', "&6CraftBahn &8» &c/fahrziele")));
-				message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel list"));
+				message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziele"));
 				message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&6Alle Fahrziele auflisten"))).create()));
 				p.spigot().sendMessage((BaseComponent) message);
 
@@ -375,7 +375,7 @@ public class Commands implements TabExecutor {
 				}
 
 				plugin.createMarkerSets();
-				
+
 				TreeMap<String, Destination> destinations = plugin.getDestinations();
 				for (Destination dest : destinations.values())
 					plugin.setMarker(dest, true);
@@ -451,7 +451,7 @@ public class Commands implements TabExecutor {
 
 				TextComponent tp = new TextComponent();
 				tp.addExtra((BaseComponent)new TextComponent(ChatColor.translateAlternateColorCodes('&', " &7[&fTP&7]")));
-				tp.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrziel tp " + dest.getName()));
+				tp.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/fahrzieledit tp " + dest.getName()));
 				tp.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, (new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', "&6Teleportiere zum Zielort"))).create()));
 
 				message.addExtra((BaseComponent) tp);
@@ -538,6 +538,17 @@ public class Commands implements TabExecutor {
 						proposals.add("MAIN_STATION");
 						proposals.add("PLAYER_STATION");
 						break;
+				}
+			}
+
+			else if (args.length == 3) {
+				switch(args[0]) {
+					case "add":
+						if (!sender.hasPermission("ctdestinations.edit.add")) break;
+						proposals.add("STATION");
+						proposals.add("MAIN_STATION");
+						proposals.add("PLAYER_STATION");
+						break;
 
 					case "setowner":
 						if (!sender.hasPermission("ctdestinations.edit.setowner")) break;
@@ -545,12 +556,6 @@ public class Commands implements TabExecutor {
 							proposals.add(p.getName());
 						break;
 				}
-			}
-
-			else if (args.length == 3 && args[0].equalsIgnoreCase("add")) {
-				proposals.add("STATION");
-				proposals.add("MAIN_STATION");
-				proposals.add("PLAYER_STATION");
 			}
 
 			else if (args.length == 4 && args[0].equalsIgnoreCase("add")) {
