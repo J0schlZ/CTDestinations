@@ -1,17 +1,20 @@
 package de.crafttogether.ctdestinations;
 
+import java.util.ArrayList;
+import java.util.TreeMap;
 import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 public class Destination {
     private String name = null;
-
-    private UUID owner = null;
-
+    private String description = null;
+    private ArrayList<OfflinePlayer> ownerList;
     private Enum<?> type = null;
-
     private Location location = null;
-
     private Boolean isPublic = null;
 
     public enum DestinationType {
@@ -29,6 +32,13 @@ public class Destination {
             }
         },
 
+        PUBLIC_STATION {
+            @Override
+            public String toString() {
+                return "Öffentliche";
+            }
+        },
+
         PLAYER_STATION {
             @Override
             public String toString() {
@@ -37,9 +47,9 @@ public class Destination {
         }
     }
 
-    public Destination(String name, UUID owner, Enum<?> type, Location location, Boolean isPublic) {
+    public Destination(String name, String description, Enum<?> type, Location location, Boolean isPublic) {
         this.name = name;
-        this.owner = owner;
+        this.description = description;
         this.type = type;
         this.location = location;
         this.isPublic = isPublic;
@@ -49,9 +59,11 @@ public class Destination {
         return this.name;
     }
 
-    public UUID getOwner() {
-        return this.owner;
+    public String getDescription() {
+        return this.description;
     }
+
+    public ArrayList<OfflinePlayer> getOwners() { return this.ownerList; }
 
     public Enum<?> getType() {
         return this.type;
@@ -69,19 +81,20 @@ public class Destination {
         this.name = name;
     }
 
-    public void setOwner(UUID owner) {
-        this.owner = owner;
+    public void setDescription(String description) {
+        this.description = name;
     }
 
     public void setType(Enum<?> type) {
-        if (type != DestinationType.MAIN_STATION && type != DestinationType.PLAYER_STATION && type != DestinationType.STATION)
+        if (findType(type) == null)
             return;
         this.type = type;
     }
 
     public void setType(String type) {
-        if (!type.equalsIgnoreCase("MAIN_STATION") && !type.equalsIgnoreCase("PLAYER_STATION") && !type.equalsIgnoreCase("STATION"))
+        if (findType(type) == null)
             return;
+
         this.type = DestinationType.valueOf(type);
     }
 
@@ -91,6 +104,33 @@ public class Destination {
 
     public void setPublic(Boolean isPublic) {
         this.isPublic = isPublic;
+    }
+
+    public boolean hasOwner(UUID uuid) {
+        for (OfflinePlayer owner : ownerList) {
+            if (owner.getUniqueId().equals(uuid))
+                return true;
+        }
+
+        return false;
+    }
+
+    public boolean hasOwner (OfflinePlayer owner) {
+        return hasOwner(owner.getUniqueId());
+    }
+
+    public void addOwner(OfflinePlayer owner) {
+        if (!ownerList.contains(owner))
+            ownerList.add(owner);
+    }
+
+    public void removeOwner(OfflinePlayer owner) {
+        if (ownerList.contains(owner))
+            ownerList.remove(owner);
+    }
+
+    public DestinationType findType(Enum<?> type) {
+        return findType(type.name());
     }
 
     public static DestinationType findType(String label) {

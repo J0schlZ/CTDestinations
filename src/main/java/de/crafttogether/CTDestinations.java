@@ -14,10 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.command.TabExecutor;
@@ -27,6 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.dynmap.DynmapAPI;
 import org.dynmap.DynmapCommonAPI;
 import org.dynmap.markers.Marker;
@@ -69,6 +67,23 @@ public class CTDestinations extends JavaPlugin implements Listener {
         registerCommand("fahrziel", cmdListener);
         registerCommand("fahrziele", cmdListener);
         registerCommand("fahrzieledit", cmdListener);
+
+        Bukkit.getServer().getScheduler().runTask(this, new Runnable() {
+            @Override
+            public void run() {
+                plugin.getLogger().info("Setup MarkerSets...");
+                plugin.createMarkerSets();
+
+                plugin.getLogger().info("Setup Markers...");
+                TreeMap<String, Destination> destinations = plugin.getDestinations();
+                for (Destination dest : destinations.values())
+                    plugin.setMarker(dest, true);
+                
+                plugin.getLogger().info("Setup complete.");
+            }
+        });
+
+        plugin.getLogger().info(this.getDescription().getName() + " v" + this.getDescription().getVersion() + " enabled");
     }
 
     public void onDisable() {}
@@ -167,7 +182,7 @@ public class CTDestinations extends JavaPlugin implements Listener {
         if (owner == null)
             showOwner = false;
 
-        label = "<div class=\"ctdestination\" id=\"" + dest.getName() + "\"><div style=\"padding:6px\"><h3 style=\"padding:0px;margin:0px;color:#ffaa00\">" + label + " <span style=\"color:#aaaaaa\">(" + dest.getName() + ")</span></h3>" + (showOwner ? "<span style=\"font-weight:bold;color:#aaaaaa;\">Besitzer:</span> " + owner + "<br>" : "") + "<span style=\"font-style:italic;font-weight:bold;color:#ff5555\">/fahrziel " + dest.getName() + "</span></div></div>";
+        label = "<div class=\"ctdestination\" id=\"" + dest.getName() + "\"><div style=\"padding:6px\"><h3 style=\"padding:0px;margin:0px;color:#ffaa00\">" + dest.getName() + " <span style=\"color:#aaaaaa\">(" + label + ")</span></h3>" + (showOwner ? "<span style=\"font-weight:bold;color:#aaaaaa;\">Besitzer:</span> " + owner + "<br>" : "") + "<span style=\"font-style:italic;font-weight:bold;color:#ff5555\">/fahrziel " + dest.getName() + "</span></div></div>";
         //label += " ("+dest.getName()+")";
 
         // Delete Marker if exists
@@ -194,12 +209,12 @@ public class CTDestinations extends JavaPlugin implements Listener {
             throw new RuntimeException("Unable to create file destinations.txt", e);
         }
 
-        BufferedReader read = null;
+        BufferedReader reader = null;
         try {
-            read = new BufferedReader(new InputStreamReader(new FileInputStream(destinationFile), "UTF8"));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(destinationFile), "UTF8"));
             String line;
 
-            while ((line = read.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 line = line.trim();
 
                 if (!line.equals("") && !line.startsWith("#")) {
@@ -225,7 +240,6 @@ public class CTDestinations extends JavaPlugin implements Listener {
             }
 
             this.destinations = new TreeMap<>(readed);
-            read.close();
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -235,12 +249,13 @@ public class CTDestinations extends JavaPlugin implements Listener {
         }
 
         finally {
-            if (read != null)
+            if (reader != null) {
                 try {
-                    read.close();
+                    reader.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
         }
     }
 
@@ -253,7 +268,9 @@ public class CTDestinations extends JavaPlugin implements Listener {
         try {
             if (!destinationFile.exists())
                 destinationFile.createNewFile();
-        } catch (IOException e) {
+        }
+
+        catch (IOException e) {
             throw new RuntimeException("Unable to create file destinations.txt", e);
         }
 
@@ -266,12 +283,24 @@ public class CTDestinations extends JavaPlugin implements Listener {
             data = data + dest.getName() + ":" + dest.getOwner() + ":" + dest.getType().name() + ":" + location + ":" + dest.isPublic() + "\r\n";
         }
 
+        FileWriter writer = null;
         try {
-            FileWriter fw = new FileWriter(destinationFile);
-            fw.write(data);
-            fw.close();
-        } catch (IOException ex) {
+            writer = new FileWriter(destinationFile);
+            writer.write(data);
+        }
+
+        catch (IOException ex) {
             ex.printStackTrace();
+        }
+        
+        finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -293,11 +322,11 @@ public class CTDestinations extends JavaPlugin implements Listener {
         return plugin;
     }
 
-    public void addDestination(String name, UUID owner, Destination.DestinationType type, Location location, Boolean isPublic) {
+    public void addDestination(String name, String description, Destination.DestinationType type, Location location, Boolean isPublic) {
         if (getDestination(name) != null)
             return;
 
-        Destination dest = new Destination(name, owner, (Enum)type, location, isPublic);
+        Destination dest = new Destination(name, description, (Enum)type, location, isPublic);
 
         // Create dynmap-marker
         setMarker(dest);
@@ -316,13 +345,13 @@ public class CTDestinations extends JavaPlugin implements Listener {
         saveDestinations();
     }
 
-    public void setOwner(String name, UUID ownerUUID) {
+    public void addOwner(String name, OfflinePlayer owner) {
         Destination dest = getDestination(name);
 
         if (dest == null)
             return;
 
-        dest.setOwner(ownerUUID);
+        dest.addOwner(owner);
         saveDestinations();
     }
 

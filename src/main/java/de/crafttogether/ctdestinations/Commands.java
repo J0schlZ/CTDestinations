@@ -428,11 +428,17 @@ public class Commands implements TabExecutor {
 
 			String hoverText = "/fahrziel " + dest.getName();
 
-			if (dest.getOwner() != null && p.hasPermission("ctdestinations.see.owner")) {
-				OfflinePlayer owner = Bukkit.getOfflinePlayer(dest.getOwner());
+			if (dest.getOwners().size() > 0 && p.hasPermission("ctdestinations.see.owner")) {
+				ArrayList<OfflinePlayer> owners = dest.getOwners();
+				String readableOwnerList = "";
 
-				if (owner.hasPlayedBefore())
-					hoverText = hoverText + "\n&6Besitzer: &e" + Bukkit.getOfflinePlayer(dest.getOwner()).getName();
+				for (OfflinePlayer owner : owners) {
+					if (owner.hasPlayedBefore())
+						readableOwnerList += owner.getName() + ", ";
+				}
+
+				if (readableOwnerList.length() > 0)
+					hoverText = hoverText + "\n&6Besitzer: &e" + readableOwnerList;
 			}
 
 			if (dest.getLocation() != null && p.hasPermission("ctdestinations.see.location"))
@@ -490,7 +496,6 @@ public class Commands implements TabExecutor {
 
 		else if (cmd.getName().equalsIgnoreCase("fahrzieledit")) {
 			if (args.length == 1) {
-				proposals.add("list");
 				if (sender.hasPermission("ctdestinations.edit.add"))
 					proposals.add("add");
 				if (sender.hasPermission("ctdestinations.edit.remove"))
@@ -511,55 +516,41 @@ public class Commands implements TabExecutor {
 					proposals.add("tp");
 			}
 			else if (args.length == 2) {
-				switch (args[0]) {
-					default:
-						if (!sender.hasPermission("ctdestinations.edit." + args[0]))
-							return new ArrayList<String>();
+				if (args[0].equalsIgnoreCase("add") && sender.hasPermission("ctdestinations.edit.add"))
+					proposals.add("<name>");
 
-						TreeMap<String, Destination> destinations = plugin.getDestinations();
+				else {
+					if (!sender.hasPermission("ctdestinations.edit." + args[0]))
+						return new ArrayList<String>();
 
-						for (Map.Entry<String, Destination> entry : destinations.entrySet()) {
-							if (args[0].equalsIgnoreCase("setprivate") && !entry.getValue().isPublic()) continue;
-							if (args[0].equalsIgnoreCase("setpublic") && entry.getValue().isPublic()) continue;
+					TreeMap<String, Destination> destinations = plugin.getDestinations();
 
-							proposals.add(entry.getKey());
-						}
+					for (Map.Entry<String, Destination> entry : destinations.entrySet()) {
+						if (args[0].equalsIgnoreCase("setprivate") && !entry.getValue().isPublic()) continue;
+						if (args[0].equalsIgnoreCase("setpublic") && entry.getValue().isPublic()) continue;
 
-						break;
-
-					case "add":
-						if (!sender.hasPermission("ctdestinations.edit.add")) break;
-						proposals.add("<name>");
-						break;
-
-					case "settype":
-						if (!sender.hasPermission("ctdestinations.edit.settype")) break;
-						proposals.add("STATION");
-						proposals.add("MAIN_STATION");
-						proposals.add("PLAYER_STATION");
-						break;
+						proposals.add(entry.getKey());
+					}
 				}
 			}
 
 			else if (args.length == 3) {
-				switch(args[0]) {
-					case "add":
-						if (!sender.hasPermission("ctdestinations.edit.add")) break;
+				if (args[0].equalsIgnoreCase("setowner") && sender.hasPermission("ctdestinations.edit.setowner")) {
+					for (Player p : Bukkit.getOnlinePlayers())
+						proposals.add(p.getName());
+
+				} else if (args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("settype")) {
+					if (sender.hasPermission("ctdestinations.edit.add") || sender.hasPermission("ctdestinations.edit.settype")) {
 						proposals.add("STATION");
 						proposals.add("MAIN_STATION");
 						proposals.add("PLAYER_STATION");
-						break;
-
-					case "setowner":
-						if (!sender.hasPermission("ctdestinations.edit.setowner")) break;
-						for (Player p : Bukkit.getOnlinePlayers())
-							proposals.add(p.getName());
-						break;
+					}
 				}
 			}
 
 			else if (args.length == 4 && args[0].equalsIgnoreCase("add")) {
-				proposals.add("PRIVATE");
+				if (sender.hasPermission("ctdestinations.edit.add"))
+					proposals.add("PRIVATE");
 			}
 		}
 
